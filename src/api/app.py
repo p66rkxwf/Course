@@ -1,6 +1,11 @@
+"""
+Course Master API 模块
+
+提供课程数据的 RESTful API 服务。
+注意：此模块仅提供 API 端点，不提供静态文件服务。
+前端应作为独立的静态网站部署。
+"""
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import pandas as pd
@@ -8,7 +13,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
-from config import PROCESSED_DATA_DIR, WEB_DIR, API_HOST, API_PORT, LOG_LEVEL, LOG_FORMAT, LOG_FILE, LOG_DIR
+from config import PROCESSED_DATA_DIR, API_HOST, API_PORT, LOG_LEVEL, LOG_FORMAT, LOG_FILE, LOG_DIR
 from utils.common import safe_read_csv, setup_logging
 
 def clean_course_data(courses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -79,18 +84,24 @@ def calculate_historical_stats(full_df: pd.DataFrame) -> Dict[tuple, float]:
     
     return avg_rates
 
-app = FastAPI(title="Course Master API", version="1.0.0")
+app = FastAPI(
+    title="Course Master API",
+    version="1.0.0",
+    description="智慧選課輔助系統 API 服務",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
+# CORS 配置
+# 注意：生产环境应该限制 allow_origins 为具体的前端域名
+# 例如：allow_origins=["https://your-frontend-domain.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # 开发环境允许所有源，生产环境应限制
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.mount("/css", StaticFiles(directory=str(WEB_DIR / "assets" / "css")), name="css")
-app.mount("/js", StaticFiles(directory=str(WEB_DIR / "assets" / "js")), name="js")
 
 _courses_cache: Dict[str, pd.DataFrame] = {}
 
@@ -176,8 +187,19 @@ class RecommendRequest(BaseModel):
     preferred_days: Optional[List[str]] = None
 
 @app.get("/")
-async def read_root():
-    return FileResponse(WEB_DIR / "index.html")
+async def root():
+    """API 根路径，返回 API 信息"""
+    return {
+        "name": "Course Master API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "redoc": "/redoc"
+    }
+
+@app.get("/api/health")
+async def health_check():
+    """健康检查端点"""
+    return {"status": "healthy", "service": "Course Master API"}
 
 @app.get("/api/courses/all")
 async def get_all_courses(year: Optional[int] = None, semester: Optional[int] = None):

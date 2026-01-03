@@ -2,6 +2,24 @@
 
 簡短說明：本專案爬取學校課程資料、清理與整合欄位，並透過 API 提供課程查詢與推薦功能。
 
+## 🏗️ 架构说明
+
+本项目采用**前后端分离架构**：
+
+- **后端**：Python FastAPI 服务，提供 RESTful API 和数据处理功能
+- **前端**：静态网站，通过 HTTP 与后端 API 通信
+
+### 架构优势
+
+- ✅ **职责分离**：前后端独立开发和部署
+- ✅ **部署灵活**：前端可部署到 GitHub Pages、Netlify 等静态托管服务
+- ✅ **易于扩展**：后端 API 可被多个前端应用复用
+- ✅ **性能优化**：前端静态资源可通过 CDN 加速
+
+详细架构设计请参考：[架构设计文档](./docs/ARCHITECTURE.md)
+
+如需迁移指南，请参考：[迁移指南](./docs/MIGRATION.md)
+
 ---
 
 ## 🔧 快速檢查清單（我將執行的子任務）
@@ -29,7 +47,9 @@
   - `src/api/app_old.py` — 過去版本，**保留作為參考**（可移除）
   - `src/utils/` — 工具函式（`common.py`, `io.py`）
 - `scripts/` — 維護工具（例如 `print_config.py`, `check_processed_fields.py`, `manual_recommend_test.py`）
-- `web/` — 前端檔案（`index.html`, `assets/`）
+- `web/` — 前端靜態網站（`index.html`, `assets/`）
+  - 獨立部署，通過 HTTP 與後端 API 通信
+  - 詳細部署說明請參考 [前端部署說明](./frontend/README.md)
 
 ---
 
@@ -58,11 +78,43 @@
 
 ---
 
-## 🚀 快速啟動（安全流程）
+## 🚀 快速啟動
+
+### 后端 API 服务
 
 1. 安裝依賴： `pip install -r requirements.txt`
 2. 檢查現有處理檔案： `python scripts/check_processed_fields.py`
 3. 啟動 API： `python main.py api`（需 `data/processed` 中有檔案）
+
+API 将在 `http://localhost:8000` 启动，API 文档可在 `http://localhost:8000/docs` 查看。
+
+### 前端开发
+
+1. 进入前端目录： `cd web`
+2. 启动开发服务器： `python -m http.server 8080`
+3. 在浏览器中访问： `http://localhost:8080`
+
+**注意**：前端默认配置为连接 `http://localhost:8000/api`，如需修改请编辑 `web/index.html` 中的 `API_CONFIG`。
+
+### 完整开发环境
+
+**终端 1 - 启动后端**：
+```bash
+python main.py api
+```
+
+**终端 2 - 启动前端**：
+```bash
+cd web
+python -m http.server 8080
+```
+
+然后在浏览器中访问 `http://localhost:8080`。
+
+### 生产环境部署
+
+- **后端部署**：参考 [架构设计文档](./docs/ARCHITECTURE.md) 中的部署方案
+- **前端部署**：参考 [前端部署说明](./frontend/README.md)
 
 ---
 

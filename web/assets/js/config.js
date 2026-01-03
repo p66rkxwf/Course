@@ -1,7 +1,21 @@
 /**
  * 全局配置與常數
+ * 
+ * API 服务器配置：
+ * - 开发环境：通常为 'http://localhost:8000/api'
+ * - 生产环境：设置为实际的 API 服务器地址，例如 'https://api.example.com/api'
+ * 
+ * 配置方式：
+ * 1. 直接修改下面的 API_BASE 值
+ * 2. 或通过环境变量（如果使用构建工具）
+ * 3. 或在部署时通过配置文件覆盖
  */
-export const API_BASE = '/api';
+// 默认配置：开发环境（本地 API 服务器）
+// 生产环境部署时，请修改为实际的 API 服务器地址
+const DEFAULT_API_BASE = 'http://localhost:8000/api';
+
+// 尝试从 window 对象获取配置（允许在 HTML 中通过 <script> 标签覆盖）
+export const API_BASE = window.API_CONFIG?.API_BASE || DEFAULT_API_BASE;
 
 export const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 
